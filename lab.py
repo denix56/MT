@@ -2,7 +2,7 @@ from turing_machine import TuringMachine
 from Graph import Graph
 
 alpha = set(['0', '1', ' '])
-def create_mt(tape):
+def create_mt(tape, initials):
     transition_function = {}
     first = tape[0]
     last = tape[-1]
@@ -24,7 +24,20 @@ def create_mt(tape):
 
     transition_function[('q5', ' ')] = (' ', 'R', 'q6')
     transition_function[('q6', first)] = (last, 'R', 'q7')
-    #хз как писать инициалы
+
+    for x in alpha:
+        if x != ' ':
+            transition_function[('q7', x)] = (x, 'R', 'q7')
+
+    curr_state = 7
+    for t in initials:
+        s = bin(ord(t))[2:].zfill(8)
+        for symb in s:
+            transition_function[('q' + str(curr_state), ' ')] = (symb, 'R', 'q' + str(curr_state + 1))
+            curr_state += 1
+
+    transition_function[('q' + str(curr_state), ' ')] = (' ', 'N', 'qs')
+
 
 
 transition_function = {("q1", "0"): ("0", "R", "q2"),
@@ -39,7 +52,12 @@ transition_function = {("q1", "0"): ("0", "R", "q2"),
                        }
 
 final_states = {'qs'}
+print("Enter tape: ")
 tape = input()
+
+print("Enter your initials: ")
+initials = input()
+
 print("Tape has been read.\n", '"' + tape + '"')
 graph = Graph(transition_function)
 
@@ -62,16 +80,13 @@ while not t.final():
     i += 1
     history = t.get_history()
     if not flag:
-        for cycle in cycles:
-            if len(cycle) <= len(history):
-                for state, cycle_state in zip(history[::-1], cycle):
-                    if state != cycle_state:
-                        flag = False
-                        break
-                    else:
-                        flag = True
-                if flag:
-                    break
+        node = cycles
+        for state in history[::-1] + [()]:
+            if state in node:
+                flag = True
+            else:
+                flag= False
+                break
     elif flag and i >= 7:
         print("Turing machine cannot be applied to this tape.")
         print(history)

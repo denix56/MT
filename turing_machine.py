@@ -21,6 +21,8 @@ class Tape(object):
 
 class TuringMachine(object):
 
+    __last_dir = ''
+
     def __init__(self,
                  tape="",
                  blank_symbol=" ",
@@ -32,7 +34,7 @@ class TuringMachine(object):
         self.__head_position = head_position
         self.__blank_symbol = blank_symbol
         self.__current_state = initial_state
-        self.__history = []
+        self.__history = [(self.__tape[0], 'R', initial_state)]
         if transition_function == None:
             self.__transition_function = {}
         else:
@@ -48,10 +50,11 @@ class TuringMachine(object):
     def step(self):
         char_under_head = self.__tape[self.__head_position]
         x = (self.__current_state, char_under_head)
-        self.__history.append(x)
+
 
         if x in self.__transition_function:
             y = self.__transition_function[x]
+            self.__history.append(y)
             self.__tape[self.__head_position] = y[0]
             prev_position = self.__head_position
             if y[1] == "R":
